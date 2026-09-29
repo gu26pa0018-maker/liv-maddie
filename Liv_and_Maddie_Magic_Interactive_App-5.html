@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liv & Maddie — Interactive TV Show</title>
+<style>
+:root{
+  --purple:#67398f; --deep:#45255f; --mint:#78dcca; --mint2:#dff8f1;
+  --lav:#eee5f6; --cream:#fbf7f0; --pink:#f1c3da; --ink:#302637;
+  --muted:#766b7e; --white:#fff; --shadow:0 18px 55px rgba(69,37,95,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;background:linear-gradient(135deg,var(--cream),#f3eaf7);
+  color:var(--ink);font-family:"Segoe UI",Tahoma,sans-serif;
+}
+button{font:inherit}
+.app{width:min(1180px,96vw);margin:22px auto 40px;background:var(--white);
+  border-radius:30px;overflow:hidden;box-shadow:var(--shadow)}
+.topbar{height:64px;background:var(--deep);display:flex;align-items:center;padding:0 22px;color:white}
+.window-dots{display:flex;gap:7px;margin-right:14px}.window-dots i{width:11px;height:11px;border-radius:50%;background:var(--mint)}
+.brand{font-family:Georgia,serif;letter-spacing:.4px;font-size:19px}
+nav{display:flex;gap:7px;flex-wrap:wrap;padding:13px 18px;background:#faf5fc;border-bottom:1px solid #eadff0}
+.tab-btn{border:0;background:transparent;color:var(--muted);padding:9px 13px;border-radius:18px;font-weight:700;cursor:pointer}
+.tab-btn.active,.tab-btn:hover{background:var(--purple);color:#fff;box-shadow:0 5px 15px rgba(103,57,143,.25)}
+main{padding:34px}
+section{display:none;min-height:610px;animation:fade .35s ease}section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1,h2,h3{font-family:Georgia,serif;color:var(--deep)}
+h1{font-size:clamp(38px,6vw,64px);line-height:1;margin:10px 0 14px}
+h2{font-size:34px;margin-bottom:15px} h3{font-size:21px;margin-bottom:9px}
+.lead{font:22px/1.5 Georgia,serif;max-width:760px}.small{font-size:13px;color:var(--muted)}
+.tag{display:inline-block;background:var(--mint);color:var(--deep);font-weight:800;padding:7px 13px;border-radius:999px}
+.hero{display:grid;grid-template-columns:1.12fr .88fr;gap:34px;align-items:center}
+.mirror-card{background:linear-gradient(145deg,var(--mint2),var(--lav));border:8px solid #f1ecf2;border-radius:30px;padding:22px;box-shadow:0 15px 35px #45255f1c}
+.mirror-container{position:relative;height:390px;border-radius:20px;overflow:hidden;background:#222;box-shadow:inset 0 0 20px #0008}
+.program-image{position:absolute;width:100%;height:100%;object-fit:cover;left:0;top:0}
+#fogCanvas{position:absolute;inset:0;z-index:2;cursor:crosshair}
+.hair-dryer{position:absolute;width:76px;height:76px;z-index:4;display:none;filter:drop-shadow(0 7px 7px #0005);pointer-events:none}
+.dryer-wind{position:absolute;width:95px;height:95px;border-radius:50%;z-index:3;display:none;
+background:radial-gradient(circle,rgba(120,220,202,.7),rgba(120,220,202,0) 68%);animation:pulse .3s infinite alternate}
+@keyframes pulse{to{transform:scale(1.22);opacity:.65}}
+.reveal-title{position:absolute;z-index:1;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-shadow:0 3px 15px #000;pointer-events:none}
+.reveal-title h2{color:#fff;font-size:39px;margin:0}.reveal-title p{font-weight:700;letter-spacing:2px}
+.mirror-controls{text-align:center;margin-top:12px}
+.btn{border:0;border-radius:12px;padding:12px 20px;font-weight:800;color:white;background:linear-gradient(45deg,var(--purple),var(--deep));cursor:pointer;box-shadow:0 8px 20px #67398f35}
+.btn.secondary{background:var(--mint);color:var(--deep)}
+.visual-icons{display:flex;gap:15px;justify-content:center;margin-top:14px;font-size:32px}
+.visual-icons span{display:inline-flex;width:55px;height:55px;border-radius:17px;align-items:center;justify-content:center;background:#ffffffb8;box-shadow:0 5px 15px #45255f14}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.card{padding:23px;border-radius:22px;background:var(--lav)}.card.mint{background:var(--mint2)}
+.card p,.card li{font-size:15.5px;line-height:1.55}.card ul{padding-left:20px}
+.timeline .item{display:grid;grid-template-columns:55px 220px 1fr;gap:16px;align-items:center;margin:17px 0}
+.num{background:var(--purple);color:#fff;border-radius:13px;padding:12px;text-align:center;font-weight:800}
+.episode-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.info-box{padding:24px;border-radius:22px;background:var(--mint2)}
+.crime-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.icon{font-size:42px;margin-bottom:10px}.source{font-size:14px;line-height:1.6}
+.footer-note{text-align:center;color:var(--muted);font-size:12px;margin-top:15px}
+a{color:var(--purple);font-weight:800;text-decoration:none}
+@media(max-width:850px){
+ .hero,.episode-layout,.cards,.crime-grid{grid-template-columns:1fr}
+ .timeline .item{grid-template-columns:50px 1fr}.timeline .item p{grid-column:2}
+ main{padding:23px}.mirror-container{height:330px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="window-dots"><i></i><i></i><i></i></div>
+    <div class="brand">LIV & MADDIE • INTERACTIVE TV SHOW</div>
+  </div>
+
+  <nav>
+    <button class="tab-btn active" data-tab="home">HOME</button>
+    <button class="tab-btn" data-tab="about">ABOUT</button>
+    <button class="tab-btn" data-tab="ep1">EP. 1</button>
+    <button class="tab-btn" data-tab="crime">CRIME</button>
+    <button class="tab-btn" data-tab="fix">MAKE IT RIGHT</button>
+    <button class="tab-btn" data-tab="sources">SOURCES</button>
+  </nav>
+
+  <main>
+    <!-- HOME -->
+    <section id="home" class="active">
+      <div class="hero">
+        <div>
+          <span class="tag">APP MODE</span>
+          <h1>Liv & Maddie</h1>
+          <p class="lead">Twin lives. Different worlds. One family.</p>
+          <p style="margin-top:18px;line-height:1.65">
+            <b>Liv & Maddie</b> is a Disney Channel comedy about identical twins whose personalities,
+            interests and experiences are very different. When Liv returns home from Hollywood,
+            the sisters have to learn how to fit their two worlds together again.
+          </p>
+          <div class="visual-icons">
+            <span title="Maddie's basketball world">🏀</span>
+            <span title="Liv's fashion / celebrity world">👜</span>
+            <span title="Twin bond">👯‍♀️</span>
+          </div>
+        </div>
+
+        <div class="mirror-card">
+          <div class="mirror-container" id="mirrorContainer">
+            <img id="programImg" class="program-image"
+              src="https://pics.filmaffinity.com/Liv_y_Maddie_Serie_de_TV-967802712-large.jpg"
+              alt="Liv & Maddie poster">
+            <div class="reveal-title">
+              <p>WIPE TO REVEAL</p>
+              <h2>Liv & Maddie</h2>
+            </div>
+            <canvas id="fogCanvas"></canvas>
+
+            <svg class="hair-dryer" id="dryerIcon" viewBox="0 0 100 100" fill="#ffffff">
+              <path d="M12 28h35c15 0 27 10 27 23S62 74 47 74H36v15c0 5-4 9-9 9h-5c-5 0-9-4-9-9V74H9c-5 0-9-4-9-9v-6c0-5 4-9 9-9h3V28z"/>
+              <circle cx="49" cy="51" r="8" fill="#78dcca"/>
+            </svg>
+            <div class="dryer-wind" id="dryerWind"></div>
+          </div>
+          <div class="mirror-controls">
+            <button class="btn" id="dryerBtn">💨 Reveal with Hair Dryer</button>
+            <button class="btn secondary" id="resetBtn">Reset Mirror</button>
+          </div>
+          <p class="small" style="text-align:center;margin-top:10px">You can also wipe the fog with your finger or mouse.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about">
+      <h2>01 • What is the show about?</h2>
+      <p class="lead">The story follows identical twins who love each other but live very different lives.</p>
+      <div class="cards" style="margin-top:25px">
+        <div class="card">
+          <h3>👠 LIV ROONEY</h3>
+          <ul>
+            <li>A former Hollywood television star.</li>
+            <li>Confident, expressive and theatrical.</li>
+            <li>Returns to Wisconsin after her show ends.</li>
+            <li>Has to adjust from celebrity life to being back at home.</li>
+          </ul>
+        </div>
+        <div class="card mint">
+          <h3>🏀 MADDIE ROONEY</h3>
+          <ul>
+            <li>A talented basketball player.</li>
+            <li>More athletic and grounded.</li>
+            <li>Stayed in Wisconsin while Liv was in Hollywood.</li>
+            <li>Has her own friends, school life and routines.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px;background:#fff">
+        <h3>🎬 Main plot</h3>
+        <p>
+          The series is mainly about family, friendship, school, sports, relationships and growing up.
+          The central challenge is learning how two very different sisters can share their lives again
+          without losing what makes each of them unique.
+        </p>
+      </div>
+    </section>
+
+    <!-- EPISODE 1 -->
+    <section id="ep1">
+      <h2>02 • Episode 1 — “Twin-A-Rooney”</h2>
+      <div class="episode-layout">
+        <div>
+          <div class="card">
+            <h3>What happens?</h3>
+            <p>
+              Liv returns to Wisconsin after her television show ends. She is excited to be home,
+              but her return changes the family's routine because she and Maddie have spent years
+              living very different lives.
+            </p>
+            <p style="margin-top:12px">
+              Maddie has built a life around school, basketball and her friends, while Liv is used
+              to cameras, fame and Hollywood. Their reunion therefore creates awkward, funny and
+              emotional moments as they try to reconnect.
+            </p>
+          </div>
+          <div class="card mint" style="margin-top:18px">
+            <h3>The main idea</h3>
+            <p>
+              The first episode establishes the basic formula of the series: the twins are opposites
+              in many ways, but their sisterly relationship remains important. The conflict comes
+              mostly from adjusting to change and understanding each other's world.
+            </p>
+          </div>
+        </div>
+        <div class="info-box">
+          <h3>Episode timeline</h3>
+          <div class="timeline">
+            <div class="item"><div class="num">01</div><b>Liv comes home</b><p>Her Hollywood life is suddenly replaced by home life in Wisconsin.</p></div>
+            <div class="item"><div class="num">02</div><b>The reunion</b><p>The family welcomes her while everyone adjusts to having her back.</p></div>
+            <div class="item"><div class="num">03</div><b>Different worlds</b><p>Liv's celebrity lifestyle contrasts with Maddie's athletic school life.</p></div>
+            <div class="item"><div class="num">04</div><b>Twin bond</b><p>The episode establishes that their differences do not erase their connection.</p></div>
+          </div>
+        </div>
+      </div>
+      <p class="footer-note">This section summarizes the episode; it does not reproduce the episode itself.</p>
+    </section>
+
+    <!-- CRIME -->
+    <section id="crime">
+      <h2>03 • Crime connection</h2>
+      <p class="lead">
+        <b>Liv & Maddie is not a crime TV show.</b> However, one Season 1 episode includes a
+        shoplifting storyline, which makes the series relevant to the assignment.
+      </p>
+      <div class="crime-grid" style="margin-top:24px">
+        <div class="card">
+          <div class="icon">🕶️</div>
+          <h3>SHOPLIFTING</h3>
+          <p>
+            In <b>“Steal-A-Rooney”</b> (Season 1, Episode 4), Kylie steals sunglasses while Liv is
+            with her. Liv becomes associated with the theft even though she did not steal them.
+          </p>
+        </div>
+        <div class="card mint">
+          <div class="icon">⚠️</div>
+          <h3>PEER PRESSURE</h3>
+          <p>
+            The storyline can be discussed through the pressure to participate in someone else's
+            bad decision and the consequences of not being honest about what happened.
+          </p>
+        </div>
+        <div class="card">
+          <div class="icon">🤝</div>
+          <h3>RESPONSIBILITY</h3>
+          <p>
+            The situation creates an opportunity to discuss accountability, telling the truth and
+            supporting a friend without taking responsibility for a crime you did not commit.
+          </p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px;background:#fff">
+        <h3>Other crime types?</h3>
+        <p>
+          The series does not follow a recurring robbery, burglary, cybercrime, vandalism or
+          detective-investigation format. Crime is occasional rather than the show's main genre.
+        </p>
+      </div>
+    </section>
+
+    <!-- FIX -->
+    <section id="fix">
+      <h2>04 • How would I make it right?</h2>
+      <p class="lead">Keep the drama and humor — remove the illegal choice.</p>
+      <div class="cards" style="margin-top:24px">
+        <div class="card mint"><h3>01 • Say no</h3><p>Liv refuses to participate when Kylie suggests stealing something.</p></div>
+        <div class="card"><h3>02 • Tell the truth</h3><p>Liv explains what happened immediately instead of allowing confusion to grow.</p></div>
+        <div class="card"><h3>03 • No false blame</h3><p>Maddie supports Liv without taking responsibility for something she did not do.</p></div>
+        <div class="card mint"><h3>04 • Positive resolution</h3><p>The conflict becomes a lesson about honesty, boundaries, accountability and friendship.</p></div>
+      </div>
+      <div class="card" style="margin-top:18px;background:#fff">
+        <h3>My version of the episode</h3>
+        <p>
+          Kylie wants the sunglasses, but Liv notices what she is planning and stops her. Instead of
+          stealing them, the girls find a legal way to get the same style. The episode can still
+          have comedy and conflict, but the characters solve the problem without committing a crime.
+        </p>
+      </div>
+    </section>
+
+    <!-- SOURCES -->
+    <section id="sources">
+      <h2>05 • Sources</h2>
+      <div class="card">
+        <p class="source"><b>Disney+</b> — series information and episode listing.<br>
+          <a href="https://www.disneyplus.com/en-us/browse/entity-e6f71468-c739-4359-b114-1bfeac8babe6" target="_blank">Open Disney+ ↗</a>
+        </p>
+        <p class="source" style="margin-top:14px"><b>IMDb</b> — episode listings and episode information.<br>
+          <a href="https://www.imdb.com/title/tt2794380/episodes/" target="_blank">Open IMDb ↗</a>
+        </p>
+        <p class="source" style="margin-top:14px"><b>Liv and Maddie Wiki</b> — reference for “Steal-A-Rooney”.<br>
+          <a href="https://livandmaddie.fandom.com/wiki/Steal-A-Rooney" target="_blank">Open episode reference ↗</a>
+        </p>
+        <p class="source" style="margin-top:14px"><b>Poster reference</b> — promotional image used in the mirror reveal.<br>
+          <a href="https://pics.filmaffinity.com/Liv_y_Maddie_Serie_de_TV-967802712-large.jpg" target="_blank">Open image ↗</a>
+        </p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const tabs=document.querySelectorAll(".tab-btn");
+const sections=document.querySelectorAll("section");
+tabs.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    tabs.forEach(b=>b.classList.remove("active"));
+    sections.forEach(s=>s.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.add("active");
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+});
+
+// Mirror fog canvas
+const canvas=document.getElementById("fogCanvas");
+const ctx=canvas.getContext("2d");
+const container=document.getElementById("mirrorContainer");
+const dryer=document.getElementById("dryerIcon");
+const wind=document.getElementById("dryerWind");
+let wiping=false, animation=null;
+
+function resizeCanvas(){
+  const rect=container.getBoundingClientRect();
+  const old=document.createElement("canvas");
+  old.width=canvas.width; old.height=canvas.height;
+  if(canvas.width && canvas.height) old.getContext("2d").drawImage(canvas,0,0);
+  canvas.width=rect.width; canvas.height=rect.height;
+  drawFog();
+}
+function drawFog(){
+  ctx.globalCompositeOperation="source-over";
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="rgba(210,222,230,.94)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<650;i++){
+    ctx.fillStyle=`rgba(255,255,255,${Math.random()*.13})`;
+    ctx.beginPath();ctx.arc(Math.random()*canvas.width,Math.random()*canvas.height,Math.random()*22,0,Math.PI*2);ctx.fill();
+  }
+  ctx.fillStyle="rgba(255,255,255,.18)";
+  ctx.font="700 18px Georgia";
+  ctx.textAlign="center";
+  ctx.fillText("WIPE THE MIRROR",canvas.width/2,canvas.height/2);
+}
+function wipe(x,y,r=34){
+  ctx.globalCompositeOperation="destination-out";
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+}
+function pointerPos(e){
+  const rect=canvas.getBoundingClientRect();
+  return {x:(e.clientX||e.touches[0].clientX)-rect.left,y:(e.clientY||e.touches[0].clientY)-rect.top};
+}
+canvas.addEventListener("pointerdown",e=>{wiping=true;const p=pointerPos(e);wipe(p.x,p.y,38)});
+canvas.addEventListener("pointermove",e=>{if(!wiping)return;const p=pointerPos(e);wipe(p.x,p.y,38)});
+window.addEventListener("pointerup",()=>wiping=false);
+
+document.getElementById("dryerBtn").addEventListener("click",()=>{
+  if(animation) clearInterval(animation);
+  dryer.style.display="block";wind.style.display="block";
+  let x=10,y=15,dx=7;
+  animation=setInterval(()=>{
+    x+=dx;
+    if(x>canvas.width-90){dx=-7;y+=42}
+    if(x<10){dx=7;y+=42}
+    dryer.style.transform=`translate(${x}px,${y}px) rotate(${dx>0?-8:8}deg)`;
+    wind.style.transform=`translate(${x-25}px,${y+10}px)`;
+    wipe(x+35,y+35,48);
+    if(y>canvas.height-75){
+      clearInterval(animation);animation=null;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      dryer.style.display="none";wind.style.display="none";
+    }
+  },28);
+});
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  if(animation)clearInterval(animation);animation=null;
+  dryer.style.display="none";wind.style.display="none";drawFog();
+});
+window.addEventListener("resize",resizeCanvas);
+resizeCanvas();
+</script>
+</body>
+</html>
